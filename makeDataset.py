@@ -84,9 +84,11 @@ def checkSSLnewnew(url):
 	rc = BeautifulSoup(html_source, 'html.parser')
 	try:
 		val = rc.find('table', {'class':'checker_messages'})
-		res = val.findAll('span')[0].text
+		res1 = val.findAll('span')[0].text
+		res2 = val.findAll('td', {'class':'failed'})
+		res = [res1, res2]
 	except IndexError:
-		res = '0'
+		res = ['-1','-1']
 
 	return res
 
@@ -100,17 +102,17 @@ data_df = pd.concat([data_df, dots_df],axis=1, ignore_index=True)
 '''
 
 #for checking
-#print(checkSSLnewnew('https://info5188fb900177e.000webhostapp.com/payment-update-0.html?fb_source=bookmark_apps&ref=bookmarks&count=0&fb_bmpos=login_failed'))
+print(checkSSLnewnew('https://info5188fb900177e.000webhostapp.com/payment-update-0.html?fb_source=bookmark_apps&ref=bookmarks&count=0&fb_bmpos=login_failed'))
 
-data_df = pd.read_csv('dataset.csv',header= None)
-url_names_arr = data_df[0].tolist()
+#data_df = pd.read_csv('dataset.csv',header= None)
+#url_names_arr = data_df[0].tolist()
 
-ssl_expiries = []
+#ssl_expiries = []
 
 #for ojasvi
 #for i in range(0, 200):
 #	ssl_expiries.append(checkSSLnewnew(url_names_arr[i]))
 
 #for prabhnoor
-for i in range(200, 400):
-	ssl_expiries.append(checkSSLnewnew(url_names_arr[i]))
+#for i in range(1000, 1200):
+#	ssl_expiries.append(checkSSLnewnew(url_names_arr[i]))
