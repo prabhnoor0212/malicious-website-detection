@@ -13,20 +13,6 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys  
 import time
 
-def getHostname(url):
-	p = '(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
-
-	m = re.search(p,'http://www.abc.com:123/test')
-	return m.group('host')
-
-def getPort(url):
-	p = '(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
-
-	m = re.search(p,'http://www.abc.com:123/test')
-	if m.group('port') is None:
-		return 443
-	return m.group('port')
-
 def checkGoggleIndex(url):
 	if url in google.search(url, 5):
 		return 1
@@ -35,8 +21,12 @@ def checkGoggleIndex(url):
 
 def checkAWSRankings(url):
 	lnk = 'https://www.alexa.com/siteinfo/'+url
-	rc = BeautifulSoup(urlopen(lnk), 'html.parser')
-	val = int(rc.find('strong', class_= 'metrics-data align-vmiddle').text)
+	try:
+		rc = BeautifulSoup(urlopen(lnk), 'html.parser')
+		val = rc.find('strong', class_= 'metrics-data align-vmiddle').text
+	except:
+		val = '-'
+	print(val)
 	return val
 
 def checkSSL(hostname, port):
@@ -67,7 +57,7 @@ def checkSSLnew(url):
 def checkSubdomains(domain):
 	return len(domain.split('.'))
 
-def prefixSuffix(domain):
+def checkPrefixSuffix(domain):
 	if re.search('-', domain):
 		return -1
 	else:
@@ -75,7 +65,7 @@ def prefixSuffix(domain):
 
 def checkSSLnewnew(url):
 	lnk = 'https://www.sslshopper.com/ssl-checker.html#hostname='+url
-	browser = driver = webdriver.Chrome(executable_path='C:/chromedriver.exe')  
+	browser = webdriver.Chrome(executable_path='C:/chromedriver.exe')  
 	browser.get(lnk)
 	time.sleep(5)
 	html_source = browser.page_source  
@@ -85,34 +75,58 @@ def checkSSLnewnew(url):
 	try:
 		val = rc.find('table', {'class':'checker_messages'})
 		res1 = val.findAll('span')[0].text
-		res2 = val.findAll('td', {'class':'failed'})
+		restmp = val.findAll('td', {'class':'failed'})
+		if restmp == []:
+			res2 = 0
+		else:
+			res2 = 1
 		res = [res1, res2]
-	except IndexError:
+	except:
 		res = ['-1','-1']
 
 	return res
 
-#ye sab baad mein. first we need to collect the expiry dates
+def getDomain(url):
+	if re.search('www', url):
+		start = url.find('www') + 3
+		stop = url[start:].find('/') + start
+		return url[start:stop]
+	elif re.search('http://', url):
+		start = url.find('http://') + 7
+		stop = url[start:].find('/') + start
+		return url[start:stop]
+	elif re.search('https://', url):
+		start = url.find('https://') + 8
+		stop = url[start:].find('/') + start
+		return url[start:stop]
+	else:
+		return ''
 
-'''
-domain_names_arr = 
-dots = (list(map(checkSubdomains, url_names_arr)))
+
+
+data_df = pd.read_csv('dataset.csv',header= None)
+url_names_arr = data_df[0].tolist()
+
+domain_names_arr = list(map(getDomain, url_names_arr))
+
+dots = list(map(checkSubdomains, domain_names_arr))
 dots_df = pd.DataFrame(dots,columns=['SubDomains'])
-data_df = pd.concat([data_df, dots_df],axis=1, ignore_index=True)
-'''
 
-#for checking
-print(checkSSLnewnew('https://info5188fb900177e.000webhostapp.com/payment-update-0.html?fb_source=bookmark_apps&ref=bookmarks&count=0&fb_bmpos=login_failed'))
+prefixSuffix = list(map(checkPrefixSuffix, domain_names_arr))
+prefixSuffix_df = pd.DataFrame(prefixSuffix,columns=['PrefixSuffix'])
 
-#data_df = pd.read_csv('dataset.csv',header= None)
-#url_names_arr = data_df[0].tolist()
+#googleKnows = list(map(checkGoggleIndex, url_names_arr))
+#googleKnows_df = pd.DataFrame(googleKnows,columns=['Google Index'])
 
-#ssl_expiries = []
+awsRanks = list(map(checkAWSRankings, url_names_arr))
+awsRanks_df = pd.DataFrame(awsRanks,columns=['AWS Rank'])
 
-#for ojasvi
-#for i in range(0, 200):
-#	ssl_expiries.append(checkSSLnewnew(url_names_arr[i]))
 
-#for prabhnoor
-#for i in range(1000, 1200):
-#	ssl_expiries.append(checkSSLnewnew(url_names_arr[i]))
+data_df = pd.concat([data_df, dots_df, prefixSuffix_df, awsRanks_df],axis=1, ignore_index=True)
+
+#ssl = (list(map(checkSSLnewnew, url_names_arr[800:1000])))
+#ssl_df = pd.DataFrame(ssl,columns=['Expiry Date', 'Failed Cases'])
+
+#ssl_df.to_csv('ssl_checks06.csv')
+
+data_df.to_csv('final_dataset.csv')
