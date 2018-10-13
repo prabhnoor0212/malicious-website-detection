@@ -58,6 +58,7 @@ Build a system to classifiy a url as malicious or safe using machine learning.
 ![dist formula](https://user-images.githubusercontent.com/43536129/46881478-4fc50500-ce69-11e8-8e0a-72f07bcbdb23.PNG)
 
 ### Genetic Algorithms and Bio-inspired algos
+* As TSNE and PCA does not account for the output label while dimensionality reduction, other techniques would be more suitable
 * This algorithm short-listed only 7 features (major reduction)
 * Thus, simplifying time complexity for productionazing as well as reducing the dimensionality
 * Accuracy: 96.89%
