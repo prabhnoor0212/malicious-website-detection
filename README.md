@@ -1,4 +1,4 @@
-# malicious-website-detection
+# Malicious-Website-Detection
 
 IMPORTING>>>> In Progress (will be addidng more results and the web extension code as I get time :)
 
