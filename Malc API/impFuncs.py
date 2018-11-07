@@ -73,13 +73,13 @@ def checkAnchors(url):
 	no = ['#', 'javascript', 'mailto']
 	soup = getSoup(url)
 	if soup == -1:
-		return -1
+		return 0.937
 	domain = getDomain(url)
 	yes = [domain, url]
 	ls = soup.find_all('a', href=True)
 	mal = 0
 	if len(ls) == 0:
-		return 1
+		return -2.37
 	for a in ls:
 		for i in no:
 			if i in a['href'].lower():
