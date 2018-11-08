@@ -1,7 +1,3 @@
-
-
-
-
 import re
 from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
@@ -23,7 +19,7 @@ def getSoup(url):
 
 def getDomain(url):
 	if re.search('www', url):
-		start = url.find('www') + 3
+		start = url.find('www') + 4
 		stop = url[start:].find('/') + start
 		return url[start:stop]
 	elif re.search('http://', url):
@@ -37,14 +33,23 @@ def getDomain(url):
 	else:
 		return ''
 
-def checkSubdomains(domain):
-	return len(domain.split('.'))
+def prefixSuffix(url):
+	domain = getDomain(url)
+	if re.search('-', domain):
+		return -1
+	else:
+		return 1
+
+def checkSubdomains(url):
+	domain = getDomain(url)
+	res = len(domain.split('.'))
+	return (res- 2.78)/0.78
 
 def checkSSL(url):
 	lnk = 'https://www.sslshopper.com/ssl-checker.html#hostname='+url
 	browser = webdriver.Chrome(executable_path='C:/chromedriver.exe')  
 	browser.get(lnk)
-	time.sleep(5)
+	time.sleep(10)
 	html_source = browser.page_source  
 	browser.quit()
 
@@ -59,7 +64,7 @@ def checkSSL(url):
 			res2 = 1
 		res = [res1, res2]
 	except:
-		res = ['223','-1']
+		res = ['-1','-1']
 
 	return res
 
@@ -73,13 +78,13 @@ def checkAnchors(url):
 	no = ['#', 'javascript', 'mailto']
 	soup = getSoup(url)
 	if soup == -1:
-		return 0.937
+		return 'Nope'
 	domain = getDomain(url)
 	yes = [domain, url]
 	ls = soup.find_all('a', href=True)
 	mal = 0
 	if len(ls) == 0:
-		return -2.37
+		return (1- 215.22)/90.4
 	for a in ls:
 		for i in no:
 			if i in a['href'].lower():
@@ -88,20 +93,20 @@ def checkAnchors(url):
 			if i not in a['href']:
 				mal += 1
 	danger = (mal/len(ls))*100
-	return ((danger - 215.2)/90.4)
+	return (danger - 215.22)/90.4
 
 def checkServerForm(url):
 	soup = getSoup(url)
 	if soup == -1:
-		return 0
+		return 'Nope'
 	domain = getDomain(url)
 	ls = soup.find_all('form', action=True)
 	for i in ls:
 		if i['action'] =="" or i['action'] == "about:blank":
-			return 0
+			return -1
 		if domain not in i['action'] or url not in i['action']:
 			return 0
-	return 0
+	return 1
 
 def isIpAddress(url):
 	ip4 = re.match('([0-2]?[0-5]{1,2}|[0-1]?[0-9]{1,2}|[0-2]?[0-4][0-9])\.([0-2]?[0-5]{1,2}|[0-1]?[0-9]{1,2}|[0-2]?[0-4][0-9])\.([0-2]?[0-5]{1,2}|[0-1]?[0-9]{1,2}|[0-2]?[0-4][0-9])\.([0-2]?[0-5]{1,2}|[0-1]?[0-9]{1,2}|[0-2]?[0-4][0-9])$', url)

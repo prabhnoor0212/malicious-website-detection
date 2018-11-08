@@ -19,19 +19,32 @@ def make_prediction():
 
 		url = request.form.get('url')
 
+
+		subdomains = impFuncs.checkSubdomains(url)
 		ssl = impFuncs.checkSSL(url)
-		isIP = impFuncs.isIpAddress(url)
+		if ssl[1] == -1 or ssl[1] == '-1':
+			sslf = input('Enter ssl cert check value manually: ')
+		else:
+			sslf = ssl[1]
+		#isIP = impFuncs.isIpAddress(url)
 		hasHTTPS = impFuncs.checkHTTPSinURL(url)
-		redir = impFuncs.hasDoubleSlashes(url)
+		#redir = impFuncs.hasDoubleSlashes(url)
 		anchors = impFuncs.checkAnchors(url)
+		if anchors == 'Nope':
+			anchors = input('Enter the value for Anchor manually: ')
+			anchors = (int(anchors) - 215.22)/90.4 
 		svform = impFuncs.checkServerForm(url)
-		ssl[0] = ((int(ssl[0]) - 223.7) / 456.3)
+		if svform == 'Nope':
+			svform = input('Enter the value for Forms manually: ')
+		prefSux = impFuncs.prefixSuffix(url)
 
-		print(isIP, anchors, svform, ssl[0], ssl[1], redir, hasHTTPS)
+		print("Subdomain: ",subdomains, "presuf: ",prefSux, "anchor: ", anchors, "Forms: ", svform, "SSL: ", sslf, "hasHTTPS: ",hasHTTPS)
 
-		prediction = model.predict([[isIP, anchors, svform, ssl[0], ssl[1], redir, hasHTTPS]])
+		prediction = model.predict([[subdomains, prefSux, anchors, svform, sslf, hasHTTPS]])
 
 		label = str(np.squeeze(prediction))
+
+		print("Prediction: "+label)
 		
 		return render_template('index.html', label=label)
 
